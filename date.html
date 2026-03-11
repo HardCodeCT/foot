@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FP Scout — Date View</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080b0f;--surface:#0f1318;--surface2:#161c24;
+  --border:#1c2330;--border2:#243040;
+  --accent:#00e5ff;--green:#00e676;--yellow:#ffe600;--orange:#ff6d00;--red:#ff1744;
+  --muted:#3d4a5c;--text:#c8d4e8;--text-dim:#5a6a80;
+  --font:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.4}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:100;background:rgba(8,11,15,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);padding:0 20px;height:58px;display:flex;align-items:center;gap:14px}
+.back{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--text-dim);text-decoration:none;transition:color .15s}
+.back::before{content:'‹';font-size:18px;line-height:1}
+.back:hover{color:var(--accent)}
+.logo{font-size:18px;font-weight:800;letter-spacing:.06em;color:#fff;margin-left:auto}
+.logo span{color:var(--accent)}
+
+/* ── STATUS ── */
+#status-bar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;
+  color:var(--muted);padding:14px 20px 0;min-height:36px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;
+  animation:blink 1.3s ease-in-out infinite}
+.dot.idle{animation:none;background:var(--green)}
+.dot.err{animation:none;background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ── SKELETON ── */
+.skeleton-wrap{padding:20px 20px 0;max-width:1100px;margin:0 auto}
+.skel-hd{height:40px;width:260px;margin-bottom:20px;
+  background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
+.skel-tab{height:46px;margin-bottom:4px;
+  background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
+.skel-row{height:52px;margin-bottom:2px;
+  background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── PAGE HEADER ── */
+#page-header{display:none;max-width:1100px;margin:0 auto;padding:24px 20px 0;position:relative;z-index:1}
+.pg-date{font-size:26px;font-weight:800;letter-spacing:.02em;color:#fff}
+.pg-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
+.pg-actions{display:flex;align-items:center;gap:10px;margin-top:16px}
+.btn-red{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:transparent;border:1px solid var(--red);color:var(--red);padding:7px 16px;cursor:pointer;
+  transition:background .15s,color .15s}
+.btn-red:hover{background:var(--red);color:#fff}
+.btn-red:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── TABS ── */
+.tabs-wrap{position:sticky;top:58px;z-index:90;background:rgba(8,11,15,.97);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:0 20px;display:flex;overflow-x:auto}
+.tabs-wrap::-webkit-scrollbar{height:0}
+.tabs-wrap{display:none}
+.tab-btn{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:none;color:var(--text-dim);padding:14px 18px;cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:#fff;border-bottom-color:var(--accent)}
+.tab-count{display:inline-block;font-family:var(--mono);font-size:10px;background:var(--surface2);
+  border:1px solid var(--border2);color:var(--text-dim);padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.tab-btn.active .tab-count{color:var(--accent)}
+
+/* ── MAIN ── */
+main{max-width:1100px;margin:0 auto;padding:16px 20px 80px;position:relative;z-index:1}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block;animation:panelIn .15s ease both}
+@keyframes panelIn{from{opacity:0}to{opacity:1}}
+
+/* ── TABLE HEAD ── */
+.tbl-head{
+  display:grid;grid-template-columns:24px 1fr 1fr 68px 68px 68px 68px 32px;
+  gap:0;padding:0 8px 7px;
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--border);margin-bottom:3px
+}
+.th-c{text-align:center}
+
+/* ── CARDS ── */
+.card-list{display:flex;flex-direction:column;gap:2px}
+
+.match-card{
+  display:grid;grid-template-columns:24px 1fr 1fr 68px 68px 68px 68px 32px;
+  align-items:center;gap:0;
+  background:var(--surface);border:1px solid var(--border);
+  padding:9px 8px;
+  transition:border-color .15s,background .15s;
+  opacity:0;animation:rise .28s cubic-bezier(.22,1,.36,1) both;overflow:hidden
+}
+.match-card:hover{background:var(--surface2);border-color:var(--border2)}
+.match-card.removing{
+  animation:none !important;
+  transition:max-height .28s ease,opacity .22s ease,padding .28s ease,margin .28s ease !important;
+  max-height:0 !important;opacity:0 !important;
+  padding-top:0 !important;padding-bottom:0 !important;
+  border-top-width:0 !important;border-bottom-width:0 !important;margin:0 !important
+}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.rank{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);text-align:center}
+.rank.gold{color:#ffd700}.rank.silver{color:#c0c0c0}.rank.bronze{color:#cd7f32}
+
+.tc{display:flex;flex-direction:column;gap:2px;overflow:hidden;padding:0 7px;cursor:pointer}
+.tc.right{text-align:right;align-items:flex-end}
+.tn{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+.tp{font-family:var(--mono);font-size:10px}
+
+.vc{font-family:var(--mono);font-size:15px;font-weight:600;text-align:center;line-height:1}
+.vs{font-size:9px;color:var(--text-dim);text-align:center;margin-top:2px}
+
+.del-btn{width:28px;height:28px;border-radius:2px;background:none;border:1px solid transparent;
+  color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:color .15s,border-color .15s,background .15s;flex-shrink:0}
+.del-btn:hover{color:var(--red);border-color:rgba(255,23,68,.5);background:rgba(255,23,68,.07)}
+
+/* colours */
+.c-hi{color:var(--green)}.c-mid{color:var(--yellow)}.c-lo{color:var(--orange)}.c-dim{color:var(--text-dim)}
+
+/* empty */
+.empty{text-align:center;padding:50px 20px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);
+  backdrop-filter:blur(6px);align-items:center;justify-content:center}
+.overlay.open{display:flex;animation:fadeIn .18s ease both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border2);padding:32px 36px;
+  max-width:360px;width:92%;text-align:center;animation:scaleIn .2s cubic-bezier(.22,1,.36,1) both}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal h2{font-size:16px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+.modal p{font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:22px;line-height:1.7}
+.modal-btns{display:flex;gap:10px;justify-content:center}
+.btn-cancel{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:none;border:1px solid var(--border2);color:var(--text-dim);padding:8px 16px;cursor:pointer;
+  transition:color .15s,border-color .15s}
+.btn-cancel:hover{color:var(--text);border-color:var(--text)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:720px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 68px 68px 32px}
+  .tc.right,.tbl-head .th-b{display:none}
+}
+@media(max-width:520px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 68px 32px}
+  .vc.col-ov35,.tbl-head .th-ov35{display:none}
+}
+@media(max-width:400px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 32px}
+  .vc.col-ov25,.tbl-head .th-ov25{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="index.html">Back</a>
+  <div class="logo">FP<span>Scout</span></div>
+</header>
+
+<div id="status-bar"><div class="dot" id="dot"></div><span id="status-txt">Loading…</span></div>
+
+<div class="skeleton-wrap" id="skeletons">
+  <div class="skel-hd"></div>
+  <div class="skel-tab"></div>
+  <div class="skel-row"></div><div class="skel-row"></div><div class="skel-row"></div>
+  <div class="skel-row"></div><div class="skel-row"></div>
+</div>
+
+<div id="page-header">
+  <div class="pg-date" id="pg-date"></div>
+  <div class="pg-sub" id="pg-sub"></div>
+  <div class="pg-actions">
+    <button class="btn-red" id="btn-del-date">✕ Delete This Entire Date</button>
+  </div>
+</div>
+
+<div class="tabs-wrap" id="tabs-wrap">
+  <button class="tab-btn active" data-tab="win" >Win %<span  class="tab-count" id="cnt-win" >0</span></button>
+  <button class="tab-btn"        data-tab="ov15">OV 1.5<span class="tab-count" id="cnt-ov15">0</span></button>
+  <button class="tab-btn"        data-tab="ov25">OV 2.5<span class="tab-count" id="cnt-ov25">0</span></button>
+  <button class="tab-btn"        data-tab="ov35">OV 3.5<span class="tab-count" id="cnt-ov35">0</span></button>
+  <button class="tab-btn"        data-tab="btts">BTTS<span   class="tab-count" id="cnt-btts">0</span></button>
+</div>
+
+<main id="main" style="display:none">
+  <div class="panel active" id="panel-win">
+    <div class="tbl-head"><div></div><div>Stronger Team</div><div class="th-b">Opponent</div>
+      <div class="th-c">OV1.5</div><div class="th-c th-ov25">OV2.5</div>
+      <div class="th-c th-ov35">OV3.5</div><div class="th-c">BTTS</div><div></div></div>
+    <div class="card-list" id="list-win"></div>
+    <div class="empty" id="empty-win" style="display:none">No matches.</div>
+  </div>
+  <div class="panel" id="panel-ov15">
+    <div class="tbl-head"><div></div><div>Team A</div><div class="th-b">Team B</div>
+      <div class="th-c">OV1.5</div><div class="th-c th-ov25">OV2.5</div>
+      <div class="th-c th-ov35">OV3.5</div><div class="th-c">BTTS</div><div></div></div>
+    <div class="card-list" id="list-ov15"></div>
+    <div class="empty" id="empty-ov15" style="display:none">No matches.</div>
+  </div>
+  <div class="panel" id="panel-ov25">
+    <div class="tbl-head"><div></div><div>Team A</div><div class="th-b">Team B</div>
+      <div class="th-c">OV1.5</div><div class="th-c th-ov25">OV2.5</div>
+      <div class="th-c th-ov35">OV3.5</div><div class="th-c">BTTS</div><div></div></div>
+    <div class="card-list" id="list-ov25"></div>
+    <div class="empty" id="empty-ov25" style="display:none">No matches.</div>
+  </div>
+  <div class="panel" id="panel-ov35">
+    <div class="tbl-head"><div></div><div>Team A</div><div class="th-b">Team B</div>
+      <div class="th-c">OV1.5</div><div class="th-c th-ov25">OV2.5</div>
+      <div class="th-c th-ov35">OV3.5</div><div class="th-c">BTTS</div><div></div></div>
+    <div class="card-list" id="list-ov35"></div>
+    <div class="empty" id="empty-ov35" style="display:none">No matches.</div>
+  </div>
+  <div class="panel" id="panel-btts">
+    <div class="tbl-head"><div></div><div>Team A</div><div class="th-b">Team B</div>
+      <div class="th-c">OV1.5</div><div class="th-c th-ov25">OV2.5</div>
+      <div class="th-c th-ov35">OV3.5</div><div class="th-c">BTTS</div><div></div></div>
+    <div class="card-list" id="list-btts"></div>
+    <div class="empty" id="empty-btts" style="display:none">No matches.</div>
+  </div>
+</main>
+
+<!-- modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modal-title">Confirm Delete</h2>
+    <p id="modal-body">This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btn-modal-cancel">Cancel</button>
+      <button class="btn-red" id="btn-modal-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const STAGGER = 30;
+const TABS = ['win','ov15','ov25','ov35','btts'];
+
+let dateStr=null;
+
+// master pool keyed by firebase key
+const pool = {};   // { [key]: r }
+
+const METRICS = {
+  win:  r => Math.max(r.team_a_strength||0, r.team_b_strength||0),
+  ov15: r => r.over_1_5||0,
+  ov25: r => r.over_2_5||0,
+  ov35: r => r.over_3_5||0,
+  btts: r => r.btts||0,
+};
+
+/* ── helpers ── */
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function cls(v){ if(v==null||isNaN(v))return'c-dim'; if(v>=70)return'c-hi'; if(v>=50)return'c-mid'; if(v>=35)return'c-lo'; return'c-dim'; }
+function fmt(v){ return(v!=null&&!isNaN(v))?Number(v).toFixed(1)+'%':'—'; }
+function rankCls(i){ return i===0?'rank gold':i===1?'rank silver':i===2?'rank bronze':'rank'; }
+
+function winTeams(r){
+  const a=r.team_a_strength||0,b=r.team_b_strength||0;
+  return a>=b?{strong:r.team_a,sPct:a,weak:r.team_b,wPct:b}:{strong:r.team_b,sPct:b,weak:r.team_a,wPct:a};
+}
+
+function setStatus(msg,state){
+  document.getElementById('status-txt').textContent=msg;
+  document.getElementById('dot').className='dot'+(state?' '+state:'');
+}
+
+/* ── api helpers ── */
+async function apiDelete(path){
+  const res=await fetch(`/api/predictions${path}`,{method:'DELETE'});
+  if(!res.ok)throw new Error('Delete '+res.status);
+}
+
+/* ── build one card ── */
+function makeCard(key, r, rank, delay){
+  const w=winTeams(r);
+  const el=document.createElement('div');
+  el.className='match-card';
+  el.style.animationDelay=delay+'ms';
+  el.dataset.key=key;
+  el.innerHTML=
+    `<div class="${rankCls(rank)}">${rank+1}</div>`+
+    `<div class="tc" data-nav="1"><div class="tn">${esc(w.strong)}</div><div class="tp ${cls(w.sPct)}">${w.sPct.toFixed(1)}%</div></div>`+
+    `<div class="tc right" data-nav="1"><div class="tn">${esc(w.weak)}</div><div class="tp ${cls(w.wPct)}">${w.wPct.toFixed(1)}%</div></div>`+
+    `<div><div class="vc ${cls(r.over_1_5)}">${fmt(r.over_1_5)}</div><div class="vs">OV1.5</div></div>`+
+    `<div><div class="vc col-ov25 ${cls(r.over_2_5)}">${fmt(r.over_2_5)}</div><div class="vs">OV2.5</div></div>`+
+    `<div><div class="vc col-ov35 ${cls(r.over_3_5)}">${fmt(r.over_3_5)}</div><div class="vs">OV3.5</div></div>`+
+    `<div><div class="vc ${cls(r.btts)}">${fmt(r.btts)}</div><div class="vs">BTTS</div></div>`+
+    `<button class="del-btn" title="Delete" data-del="1">✕</button>`;
+
+  el.querySelectorAll('[data-nav]').forEach(n=>n.addEventListener('click',()=>{
+    location.href=`match.html?date=${encodeURIComponent(dateStr)}&key=${encodeURIComponent(key)}`;
+  }));
+  el.querySelector('[data-del]').addEventListener('click',e=>{
+    e.stopPropagation();
+    confirmDelete({
+      title:'Delete Match',
+      body:`Remove ${esc(r.team_a)} vs ${esc(r.team_b)}?`,
+      onConfirm:()=>deleteEntry(key)
+    });
+  });
+  return el;
+}
+
+/* ── render one tab ── */
+function renderTab(tab){
+  const entries=Object.entries(pool)
+    .sort((a,b)=>METRICS[tab](b[1])-METRICS[tab](a[1]));
+
+  const list=document.getElementById('list-'+tab);
+  const empty=document.getElementById('empty-'+tab);
+  const frag=document.createDocumentFragment();
+  entries.forEach(([key,r],i)=>frag.appendChild(makeCard(key,r,i,i*STAGGER)));
+  list.innerHTML='';
+  list.appendChild(frag);
+  empty.style.display=entries.length===0?'block':'none';
+  document.getElementById('cnt-'+tab).textContent=entries.length;
+}
+
+function renderAll(){
+  TABS.forEach(renderTab);
+  const n=Object.keys(pool).length;
+  document.getElementById('pg-sub').textContent=n+' prediction'+(n===1?'':'s');
+}
+
+/* ── delete single entry from all tabs ── */
+async function deleteEntry(key){
+  delete pool[key];
+  try{ await apiDelete(`/${dateStr}/${key}`); }
+  catch(e){ console.error(e); }
+
+  if(Object.keys(pool).length===0){
+    // date is now empty — go back
+    await apiDelete(`/${dateStr}`).catch(()=>{});
+    location.href='index.html';
+    return;
+  }
+  renderAll();
+}
+
+/* ── delete entire date ── */
+async function deleteDateNode(){
+  try{ await apiDelete(`/${dateStr}`); }
+  catch(e){ console.error(e); }
+  location.href='index.html';
+}
+
+/* ── tab switching ── */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const t=btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+    TABS.forEach(id=>document.getElementById('panel-'+id).classList.toggle('active',id===t));
+  });
+});
+
+/* ── modal ── */
+let _pending=null;
+function confirmDelete({title,body,onConfirm}){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').textContent=body;
+  _pending=onConfirm;
+  document.getElementById('overlay').classList.add('open');
+}
+document.getElementById('btn-modal-cancel').addEventListener('click',()=>{
+  document.getElementById('overlay').classList.remove('open'); _pending=null;
+});
+document.getElementById('overlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('overlay')){
+    document.getElementById('overlay').classList.remove('open'); _pending=null;
+  }
+});
+document.getElementById('btn-modal-confirm').addEventListener('click',async()=>{
+  const fn=_pending; _pending=null;
+  document.getElementById('overlay').classList.remove('open');
+  if(fn) await fn();
+});
+
+document.getElementById('btn-del-date').addEventListener('click',()=>{
+  confirmDelete({
+    title:'Delete Entire Date',
+    body:`Remove all predictions for ${dateStr}? This cannot be undone.`,
+    onConfirm:deleteDateNode
+  });
+});
+
+/* ── init ── */
+async function init(){
+  const params=new URLSearchParams(location.search);
+  dateStr=params.get('date');
+  if(!dateStr){
+    setStatus('No date specified.','err');
+    document.getElementById('skeletons').style.display='none';
+    return;
+  }
+
+  try{
+    const res=await fetch(`/api/predictions/${dateStr}`);
+    if(!res.ok)throw new Error('API '+res.status);
+    const data=await res.json();
+
+    document.getElementById('skeletons').style.display='none';
+
+    const dObj=new Date(dateStr+'T00:00:00');
+    const dateLabel=isNaN(dObj.getTime())?dateStr:dObj.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    document.title=`FP Scout — ${dateLabel}`;
+    document.getElementById('pg-date').textContent=dateLabel;
+
+    if(!data||typeof data!=='object'){
+      setStatus('No predictions for this date.','idle');
+      document.getElementById('page-header').style.display='block';
+      document.getElementById('tabs-wrap').style.display='flex';
+      document.getElementById('main').style.display='';
+      renderAll();
+      return;
+    }
+
+    /* populate pool */
+    Object.entries(data).forEach(([key,r])=>{
+      if(r&&r.team_a) pool[key]=r;
+    });
+
+    document.getElementById('page-header').style.display='block';
+    document.getElementById('tabs-wrap').style.display='flex';
+    document.getElementById('main').style.display='';
+
+    renderAll();
+
+    const n=Object.keys(pool).length;
+    setStatus(`${n} prediction${n===1?'':'s'} for ${dateLabel}.`,'idle');
+
+  }catch(err){
+    document.getElementById('skeletons').style.display='none';
+    setStatus('Error: '+err.message,'err');
+    console.error(err);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

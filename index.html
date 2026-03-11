@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FP Scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080b0f;--surface:#0f1318;--surface2:#161c24;
+  --border:#1c2330;--border2:#243040;
+  --accent:#00e5ff;--green:#00e676;--yellow:#ffe600;--orange:#ff6d00;--red:#ff1744;
+  --muted:#3d4a5c;--text:#c8d4e8;--text-dim:#5a6a80;
+  --font:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.4}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:100;background:rgba(8,11,15,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);padding:0 20px;height:58px;display:flex;align-items:center;gap:16px}
+.logo{font-size:19px;font-weight:800;letter-spacing:.06em;color:#fff}
+.logo span{color:var(--accent)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+#total-count{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.btn-red{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 14px;cursor:pointer;
+  transition:background .15s,color .15s}
+.btn-red:hover{background:var(--red);color:#fff}
+.btn-red:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── STATUS ── */
+#status-bar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;
+  color:var(--muted);padding:14px 20px 0;min-height:36px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;
+  animation:blink 1.3s ease-in-out infinite}
+.dot.idle{animation:none;background:var(--green)}
+.dot.err{animation:none;background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ── SKELETON ── */
+.skeleton-wrap{padding:20px 20px 0;max-width:1100px;margin:0 auto}
+.skel-hd{height:28px;width:180px;margin-bottom:12px;border-radius:2px;
+  background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
+.skel-row{height:52px;margin-bottom:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── MAIN ── */
+main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;position:relative;z-index:1}
+
+/* ── DATE GROUP ── */
+.date-group{margin-bottom:44px;animation:groupIn .3s ease both}
+@keyframes groupIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.group-header{
+  display:flex;align-items:center;gap:14px;
+  padding-bottom:10px;border-bottom:2px solid var(--border2);margin-bottom:6px
+}
+.group-date{font-size:20px;font-weight:800;letter-spacing:.02em;color:#fff}
+.group-count{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.group-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn-view-all{
+  font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:1px solid var(--border2);color:var(--text-dim);
+  padding:6px 13px;text-decoration:none;white-space:nowrap;
+  transition:color .15s,border-color .15s}
+.btn-view-all:hover{color:var(--accent);border-color:var(--accent)}
+.btn-del-group{
+  font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:1px solid var(--red);color:var(--red);
+  padding:6px 13px;cursor:pointer;white-space:nowrap;
+  transition:background .15s,color .15s}
+.btn-del-group:hover{background:var(--red);color:#fff}
+
+/* ── TABLE HEAD ── */
+.tbl-head{
+  display:grid;grid-template-columns:24px 1fr 1fr 68px 68px 68px 68px 32px;
+  gap:0;padding:0 8px 7px;
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--border);margin-bottom:3px
+}
+.th-c{text-align:center}
+
+/* ── CARDS ── */
+.card-list{display:flex;flex-direction:column;gap:2px}
+
+.match-card{
+  display:grid;grid-template-columns:24px 1fr 1fr 68px 68px 68px 68px 32px;
+  align-items:center;gap:0;
+  background:var(--surface);border:1px solid var(--border);
+  padding:9px 8px;
+  text-decoration:none;color:inherit;
+  transition:border-color .15s,background .15s;
+  opacity:0;animation:rise .28s cubic-bezier(.22,1,.36,1) both;
+  overflow:hidden
+}
+.match-card:hover{background:var(--surface2);border-color:var(--border2)}
+.match-card.removing{
+  animation:none !important;
+  transition:max-height .28s ease,opacity .22s ease,padding .28s ease,margin .28s ease !important;
+  max-height:0 !important;opacity:0 !important;
+  padding-top:0 !important;padding-bottom:0 !important;
+  border-top-width:0 !important;border-bottom-width:0 !important;
+  margin:0 !important;overflow:hidden
+}
+.match-card.entering{
+  opacity:0;animation:slideIn .3s cubic-bezier(.22,1,.36,1) both !important
+}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* rank */
+.rank{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);text-align:center}
+.rank.gold{color:#ffd700}.rank.silver{color:#c0c0c0}.rank.bronze{color:#cd7f32}
+
+/* team cell — wraps link area, not the del btn */
+.card-link{
+  display:contents; /* lets child grid items participate in parent grid */
+  text-decoration:none;color:inherit
+}
+.tc{display:flex;flex-direction:column;gap:2px;overflow:hidden;padding:0 7px;cursor:pointer}
+.tc.right{text-align:right;align-items:flex-end}
+.tn{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+.tp{font-family:var(--mono);font-size:10px}
+
+/* metric cells */
+.vc{font-family:var(--mono);font-size:15px;font-weight:600;text-align:center;line-height:1}
+.vs{font-size:9px;color:var(--text-dim);text-align:center;margin-top:2px}
+
+/* inline delete */
+.del-btn{
+  width:28px;height:28px;border-radius:2px;
+  background:none;border:1px solid transparent;
+  color:var(--muted);font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .15s,border-color .15s,background .15s;
+  flex-shrink:0
+}
+.del-btn:hover{color:var(--red);border-color:rgba(255,23,68,.5);background:rgba(255,23,68,.07)}
+
+/* group footer */
+.group-footer{padding:10px 0 0;display:flex;align-items:center;justify-content:space-between}
+.more-hint{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* colours */
+.c-hi{color:var(--green)}.c-mid{color:var(--yellow)}.c-lo{color:var(--orange)}.c-dim{color:var(--text-dim)}
+
+/* empty */
+.empty{text-align:center;padding:40px 20px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+#global-empty{display:none;text-align:center;padding:80px 20px;font-family:var(--mono);font-size:14px;color:var(--muted)}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);
+  backdrop-filter:blur(6px);align-items:center;justify-content:center}
+.overlay.open{display:flex;animation:fadeIn .18s ease both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border2);padding:32px 36px;
+  max-width:360px;width:92%;text-align:center;
+  animation:scaleIn .2s cubic-bezier(.22,1,.36,1) both}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal h2{font-size:16px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+.modal p{font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:22px;line-height:1.7}
+.modal-btns{display:flex;gap:10px;justify-content:center}
+.btn-cancel{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:none;border:1px solid var(--border2);color:var(--text-dim);padding:8px 16px;cursor:pointer;
+  transition:color .15s,border-color .15s}
+.btn-cancel:hover{color:var(--text);border-color:var(--text)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:720px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 68px 68px 32px}
+  .tc.right,.tbl-head .th-b{display:none}
+}
+@media(max-width:520px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 68px 32px}
+  .vc.col-ov35,.tbl-head .th-ov35{display:none}
+}
+@media(max-width:400px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 32px}
+  .vc.col-ov25,.tbl-head .th-ov25{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">FP<span>Scout</span></div>
+  <div class="hdr-right">
+    <span id="total-count">—</span>
+    <button class="btn-red" id="btn-clear-all" disabled>⚠ Clear All</button>
+  </div>
+</header>
+
+<div id="status-bar"><div class="dot" id="dot"></div><span id="status-txt">Connecting…</span></div>
+
+<div class="skeleton-wrap" id="skeletons">
+  <div class="skel-hd"></div>
+  <div class="skel-row"></div><div class="skel-row"></div><div class="skel-row"></div>
+  <div class="skel-row"></div><div class="skel-row"></div>
+</div>
+
+<main id="main" style="display:none">
+  <div id="groups"></div>
+  <div id="global-empty">No predictions in the database yet.</div>
+</main>
+
+<!-- Confirm modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modal-title">Confirm Delete</h2>
+    <p id="modal-body">This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btn-modal-cancel">Cancel</button>
+      <button class="btn-red" id="btn-modal-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const PREVIEW = 20;   // cards shown per date group
+const STAGGER = 30;   // ms between card animations
+
+// dateMap: { [dateStr]: { pool: [...entries sorted by win%], visible: number, groupEl } }
+const dateMap = {};
+
+/* ── helpers ── */
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function cls(v){ if(v==null||isNaN(v))return'c-dim'; if(v>=70)return'c-hi'; if(v>=50)return'c-mid'; if(v>=35)return'c-lo'; return'c-dim'; }
+function fmt(v){ return(v!=null&&!isNaN(v))?Number(v).toFixed(1)+'%':'—'; }
+function rankCls(i){ return i===0?'rank gold':i===1?'rank silver':i===2?'rank bronze':'rank'; }
+function winStr(r){
+  const a=r.team_a_strength||0,b=r.team_b_strength||0;
+  return a>=b?{strong:r.team_a,sPct:a,weak:r.team_b,wPct:b}:{strong:r.team_b,sPct:b,weak:r.team_a,wPct:a};
+}
+function setStatus(msg,state){
+  document.getElementById('status-txt').textContent=msg;
+  document.getElementById('dot').className='dot'+(state?' '+state:'');
+}
+function updateTotalCount(){
+  let n=0;
+  Object.values(dateMap).forEach(g=>n+=g.pool.length);
+  document.getElementById('total-count').textContent=n+' prediction'+(n===1?'':'s');
+  document.getElementById('btn-clear-all').disabled=n===0;
+}
+
+/* ── api helpers ── */
+async function apiDelete(path){
+  const res=await fetch(`/api/predictions${path}`,{method:'DELETE'});
+  if(!res.ok)throw new Error('Delete failed '+res.status);
+}
+
+/* ── build one card element ── */
+function makeCard(entry, rank, delay){
+  const {key,dateStr,r}=entry;
+  const w=winStr(r);
+  const el=document.createElement('div');
+  el.className='match-card';
+  el.style.animationDelay=delay+'ms';
+  el.dataset.key=key;
+  el.dataset.date=dateStr;
+  /* clicking anywhere except del-btn navigates */
+  el.innerHTML=
+    `<div class="${rankCls(rank)}">${rank+1}</div>`+
+    `<div class="tc" data-nav="1"><div class="tn">${esc(w.strong)}</div><div class="tp ${cls(w.sPct)}">${w.sPct.toFixed(1)}%</div></div>`+
+    `<div class="tc right" data-nav="1"><div class="tn">${esc(w.weak)}</div><div class="tp ${cls(w.wPct)}">${w.wPct.toFixed(1)}%</div></div>`+
+    `<div><div class="vc ${cls(r.over_1_5)}">${fmt(r.over_1_5)}</div><div class="vs">OV1.5</div></div>`+
+    `<div><div class="vc col-ov25 ${cls(r.over_2_5)}">${fmt(r.over_2_5)}</div><div class="vs">OV2.5</div></div>`+
+    `<div><div class="vc col-ov35 ${cls(r.over_3_5)}">${fmt(r.over_3_5)}</div><div class="vs">OV3.5</div></div>`+
+    `<div><div class="vc ${cls(r.btts)}">${fmt(r.btts)}</div><div class="vs">BTTS</div></div>`+
+    `<button class="del-btn" title="Delete this match" data-del="1">✕</button>`;
+
+  /* nav click */
+  el.querySelectorAll('[data-nav]').forEach(n=>n.addEventListener('click',()=>{
+    location.href=`match.html?date=${encodeURIComponent(dateStr)}&key=${encodeURIComponent(key)}`;
+  }));
+
+  /* delete click */
+  el.querySelector('[data-del]').addEventListener('click', e=>{
+    e.stopPropagation();
+    confirmDelete({
+      title:'Delete Match',
+      body:`Remove ${esc(r.team_a)} vs ${esc(r.team_b)} from Firebase?`,
+      onConfirm: ()=>deleteEntry(dateStr, key)
+    });
+  });
+
+  return el;
+}
+
+/* ── render the visible slice of a group ── */
+function renderGroup(dateStr){
+  const g=dateMap[dateStr];
+  if(!g)return;
+  const list=g.groupEl.querySelector('.card-list');
+  const footer=g.groupEl.querySelector('.group-footer');
+  const countEl=g.groupEl.querySelector('.group-count');
+
+  /* remove old cards */
+  list.innerHTML='';
+
+  const visible=g.pool.slice(0, PREVIEW);
+  const frag=document.createDocumentFragment();
+  visible.forEach((entry,i)=>{
+    frag.appendChild(makeCard(entry, i, i*STAGGER));
+  });
+  list.appendChild(frag);
+
+  /* footer hint */
+  const total=g.pool.length;
+  countEl.textContent=total+' match'+(total===1?'':'es');
+  if(total>PREVIEW){
+    footer.querySelector('.more-hint').textContent=`Showing top ${PREVIEW} of ${total}`;
+  } else {
+    footer.querySelector('.more-hint').textContent='';
+  }
+}
+
+/* ── delete a single entry ── */
+async function deleteEntry(dateStr, key){
+  const g=dateMap[dateStr];
+  if(!g)return;
+
+  /* remove from pool */
+  const idx=g.pool.findIndex(e=>e.key===key);
+  if(idx===-1)return;
+  g.pool.splice(idx,1);
+
+  /* firebase delete */
+  try{ await apiDelete(`/${dateStr}/${key}`); }
+  catch(e){ console.error(e); }
+
+  /* if group now empty remove it */
+  if(g.pool.length===0){
+    g.groupEl.remove();
+    delete dateMap[dateStr];
+    checkGlobalEmpty();
+  } else {
+    renderGroup(dateStr);
+  }
+  updateTotalCount();
+}
+
+/* ── delete entire date group ── */
+async function deleteGroup(dateStr){
+  const g=dateMap[dateStr];
+  if(!g)return;
+  try{ await apiDelete(`/${dateStr}`); }
+  catch(e){ console.error(e); }
+  g.groupEl.remove();
+  delete dateMap[dateStr];
+  updateTotalCount();
+  checkGlobalEmpty();
+}
+
+/* ── delete everything ── */
+async function deleteAll(){
+  try{ await apiDelete(''); }
+  catch(e){ console.error(e); }
+  Object.keys(dateMap).forEach(d=>{
+    dateMap[d].groupEl.remove();
+    delete dateMap[d];
+  });
+  updateTotalCount();
+  checkGlobalEmpty();
+}
+
+function checkGlobalEmpty(){
+  const empty=Object.keys(dateMap).length===0;
+  document.getElementById('global-empty').style.display=empty?'block':'none';
+}
+
+/* ── build group DOM for a date ── */
+function buildGroupEl(dateStr, pool){
+  const dObj=new Date(dateStr+'T00:00:00');
+  const dateLabel=isNaN(dObj.getTime())?dateStr:dObj.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+
+  const wrap=document.createElement('div');
+  wrap.className='date-group';
+  wrap.id='group-'+dateStr;
+  wrap.innerHTML=
+    `<div class="group-header">`+
+      `<div class="group-date">${esc(dateLabel)}</div>`+
+      `<div class="group-count"></div>`+
+      `<div class="group-actions">`+
+        `<a class="btn-view-all" href="date.html?date=${encodeURIComponent(dateStr)}">View All →</a>`+
+        `<button class="btn-del-group" data-delgroup="${esc(dateStr)}">✕ Delete Date</button>`+
+      `</div>`+
+    `</div>`+
+    `<div class="tbl-head">`+
+      `<div></div><div>Strongest</div><div class="th-b">Opponent</div>`+
+      `<div class="th-c">OV1.5</div><div class="th-c th-ov25">OV2.5</div>`+
+      `<div class="th-c th-ov35">OV3.5</div><div class="th-c">BTTS</div><div></div>`+
+    `</div>`+
+    `<div class="card-list"></div>`+
+    `<div class="group-footer"><span class="more-hint"></span>`+
+      `<a class="btn-view-all" href="date.html?date=${encodeURIComponent(dateStr)}">View All Matches →</a>`+
+    `</div>`;
+
+  wrap.querySelector('[data-delgroup]').addEventListener('click',()=>{
+    confirmDelete({
+      title:'Delete Entire Date',
+      body:`Remove all predictions for ${esc(dateLabel)} from Firebase?`,
+      onConfirm:()=>deleteGroup(dateStr)
+    });
+  });
+
+  return wrap;
+}
+
+/* ── modal confirm helper ── */
+let _pendingConfirm=null;
+function confirmDelete({title,body,onConfirm}){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').textContent=body;
+  _pendingConfirm=onConfirm;
+  document.getElementById('overlay').classList.add('open');
+}
+document.getElementById('btn-modal-cancel').addEventListener('click',()=>{
+  document.getElementById('overlay').classList.remove('open');
+  _pendingConfirm=null;
+});
+document.getElementById('overlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('overlay')){
+    document.getElementById('overlay').classList.remove('open');
+    _pendingConfirm=null;
+  }
+});
+document.getElementById('btn-modal-confirm').addEventListener('click',async ()=>{
+  const fn=_pendingConfirm;
+  _pendingConfirm=null;
+  document.getElementById('overlay').classList.remove('open');
+  if(fn) await fn();
+});
+
+/* ── clear all ── */
+document.getElementById('btn-clear-all').addEventListener('click',()=>{
+  confirmDelete({title:'Clear All Data',body:'Permanently delete every prediction in the database?',onConfirm:deleteAll});
+});
+
+/* ── init ── */
+async function init(){
+  try{
+    setStatus('Loading predictions…');
+
+    const res=await fetch('/api/predictions');
+    if(!res.ok)throw new Error('API read '+res.status);
+    const data=await res.json();
+
+    document.getElementById('skeletons').style.display='none';
+    document.getElementById('main').style.display='';
+
+    if(!data){ setStatus('No predictions found.','idle'); checkGlobalEmpty(); return; }
+
+    /* sort dates newest first */
+    const dates=Object.keys(data).sort((a,b)=>b.localeCompare(a));
+
+    const groups=document.getElementById('groups');
+
+    dates.forEach((dateStr,gi)=>{
+      const matches=data[dateStr];
+      if(!matches||typeof matches!=='object')return;
+
+      /* build pool sorted by win strength descending */
+      const pool=Object.entries(matches)
+        .filter(([,r])=>r&&r.team_a)
+        .map(([key,r])=>({key,dateStr,r}))
+        .sort((a,b)=>Math.max(b.r.team_a_strength||0,b.r.team_b_strength||0)
+                    -Math.max(a.r.team_a_strength||0,a.r.team_b_strength||0));
+
+      if(pool.length===0)return;
+
+      const groupEl=buildGroupEl(dateStr,pool);
+      /* stagger group appearances */
+      groupEl.style.animationDelay=(gi*60)+'ms';
+      groups.appendChild(groupEl);
+
+      dateMap[dateStr]={pool,groupEl};
+      renderGroup(dateStr);
+    });
+
+    checkGlobalEmpty();
+    updateTotalCount();
+
+    const total=Object.values(dateMap).reduce((s,g)=>s+g.pool.length,0);
+    setStatus(`${total} prediction${total===1?'':'s'} across ${Object.keys(dateMap).length} date${Object.keys(dateMap).length===1?'':'s'}.`,'idle');
+
+  }catch(err){
+    document.getElementById('skeletons').style.display='none';
+    setStatus('Error: '+err.message,'err');
+    console.error(err);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
