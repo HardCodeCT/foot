@@ -79,9 +79,10 @@ main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;position:relative;z-i
   transition:background .15s,color .15s}
 .btn-del-group:hover{background:var(--red);color:#fff}
 
-/* ── TABLE HEAD ── */
+/* ── TABLE HEAD ──
+   cols: rank | strong | weak | OV1.5 | OV2.5 | OV3.5 | BTTS | TS1 | TS2 | del */
 .tbl-head{
-  display:grid;grid-template-columns:24px 1fr 1fr 68px 68px 68px 68px 32px;
+  display:grid;grid-template-columns:24px 1fr 1fr 60px 60px 60px 60px 60px 60px 32px;
   gap:0;padding:0 8px 7px;
   font-family:var(--mono);font-size:9px;font-weight:600;
   letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
@@ -93,7 +94,7 @@ main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;position:relative;z-i
 .card-list{display:flex;flex-direction:column;gap:2px}
 
 .match-card{
-  display:grid;grid-template-columns:24px 1fr 1fr 68px 68px 68px 68px 32px;
+  display:grid;grid-template-columns:24px 1fr 1fr 60px 60px 60px 60px 60px 60px 32px;
   align-items:center;gap:0;
   background:var(--surface);border:1px solid var(--border);
   padding:9px 8px;
@@ -117,25 +118,18 @@ main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;position:relative;z-i
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
-/* rank */
 .rank{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);text-align:center}
 .rank.gold{color:#ffd700}.rank.silver{color:#c0c0c0}.rank.bronze{color:#cd7f32}
 
-/* team cell — wraps link area, not the del btn */
-.card-link{
-  display:contents; /* lets child grid items participate in parent grid */
-  text-decoration:none;color:inherit
-}
+.card-link{display:contents;text-decoration:none;color:inherit}
 .tc{display:flex;flex-direction:column;gap:2px;overflow:hidden;padding:0 7px;cursor:pointer}
 .tc.right{text-align:right;align-items:flex-end}
 .tn{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
 .tp{font-family:var(--mono);font-size:10px}
 
-/* metric cells */
-.vc{font-family:var(--mono);font-size:15px;font-weight:600;text-align:center;line-height:1}
+.vc{font-family:var(--mono);font-size:14px;font-weight:600;text-align:center;line-height:1}
 .vs{font-size:9px;color:var(--text-dim);text-align:center;margin-top:2px}
 
-/* inline delete */
 .del-btn{
   width:28px;height:28px;border-radius:2px;
   background:none;border:1px solid transparent;
@@ -146,14 +140,11 @@ main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;position:relative;z-i
 }
 .del-btn:hover{color:var(--red);border-color:rgba(255,23,68,.5);background:rgba(255,23,68,.07)}
 
-/* group footer */
 .group-footer{padding:10px 0 0;display:flex;align-items:center;justify-content:space-between}
 .more-hint{font-family:var(--mono);font-size:11px;color:var(--muted)}
 
-/* colours */
 .c-hi{color:var(--green)}.c-mid{color:var(--yellow)}.c-lo{color:var(--orange)}.c-dim{color:var(--text-dim)}
 
-/* empty */
 .empty{text-align:center;padding:40px 20px;font-family:var(--mono);font-size:12px;color:var(--muted)}
 #global-empty{display:none;text-align:center;padding:80px 20px;font-family:var(--mono);font-size:14px;color:var(--muted)}
 
@@ -175,17 +166,17 @@ main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;position:relative;z-i
 .btn-cancel:hover{color:var(--text);border-color:var(--text)}
 
 /* ── RESPONSIVE ── */
-@media(max-width:720px){
-  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 68px 68px 32px}
+@media(max-width:900px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 60px 60px 60px 60px 60px 32px}
   .tc.right,.tbl-head .th-b{display:none}
 }
-@media(max-width:520px){
-  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 68px 32px}
-  .vc.col-ov35,.tbl-head .th-ov35{display:none}
+@media(max-width:640px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 60px 60px 60px 32px}
+  .vc.col-ov15,.tbl-head .th-ov15,.vc.col-ov25,.tbl-head .th-ov25{display:none}
 }
-@media(max-width:400px){
-  .tbl-head,.match-card{grid-template-columns:24px 1fr 68px 32px}
-  .vc.col-ov25,.tbl-head .th-ov25{display:none}
+@media(max-width:460px){
+  .tbl-head,.match-card{grid-template-columns:24px 1fr 60px 60px 32px}
+  .vc.col-btts,.tbl-head .th-btts{display:none}
 }
 </style>
 </head>
@@ -227,13 +218,12 @@ main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;position:relative;z-i
 <script>
 "use strict";
 
-const PREVIEW = 20;   // cards shown per date group
-const STAGGER = 30;   // ms between card animations
+const PREVIEW = 20;
+const STAGGER = 30;
 
-// dateMap: { [dateStr]: { pool: [...entries sorted by win%], visible: number, groupEl } }
 const dateMap = {};
 
-/* ── helpers ── */
+/* helpers */
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function cls(v){ if(v==null||isNaN(v))return'c-dim'; if(v>=70)return'c-hi'; if(v>=50)return'c-mid'; if(v>=35)return'c-lo'; return'c-dim'; }
 function fmt(v){ return(v!=null&&!isNaN(v))?Number(v).toFixed(1)+'%':'—'; }
@@ -241,6 +231,11 @@ function rankCls(i){ return i===0?'rank gold':i===1?'rank silver':i===2?'rank br
 function winStr(r){
   const a=r.team_a_strength||0,b=r.team_b_strength||0;
   return a>=b?{strong:r.team_a,sPct:a,weak:r.team_b,wPct:b}:{strong:r.team_b,sPct:b,weak:r.team_a,wPct:a};
+}
+// best team to score: returns { team, pct } for whichever team has higher probability
+function bestTS(r, fa, fb){
+  const va=r[fa]||0, vb=r[fb]||0;
+  return va>=vb ? {team:r.team_a, pct:va} : {team:r.team_b, pct:vb};
 }
 function setStatus(msg,state){
   document.getElementById('status-txt').textContent=msg;
@@ -253,134 +248,116 @@ function updateTotalCount(){
   document.getElementById('btn-clear-all').disabled=n===0;
 }
 
-/* ── api helpers ── */
+/* api */
 async function apiDelete(path){
   const res=await fetch(`/api/predictions${path}`,{method:'DELETE'});
   if(!res.ok)throw new Error('Delete failed '+res.status);
 }
 
-/* ── build one card element ── */
+/* make card */
 function makeCard(entry, rank, delay){
   const {key,dateStr,r}=entry;
   const w=winStr(r);
+  const ts1=bestTS(r,'team_a_to_score','team_b_to_score');
+  const ts2=bestTS(r,'team_a_to_score_2','team_b_to_score_2');
+
   const el=document.createElement('div');
   el.className='match-card';
   el.style.animationDelay=delay+'ms';
   el.dataset.key=key;
   el.dataset.date=dateStr;
-  /* clicking anywhere except del-btn navigates */
+
   el.innerHTML=
     `<div class="${rankCls(rank)}">${rank+1}</div>`+
-    `<div class="tc" data-nav="1"><div class="tn">${esc(w.strong)}</div><div class="tp ${cls(w.sPct)}">${w.sPct.toFixed(1)}%</div></div>`+
-    `<div class="tc right" data-nav="1"><div class="tn">${esc(w.weak)}</div><div class="tp ${cls(w.wPct)}">${w.wPct.toFixed(1)}%</div></div>`+
-    `<div><div class="vc ${cls(r.over_1_5)}">${fmt(r.over_1_5)}</div><div class="vs">OV1.5</div></div>`+
+    `<div class="tc" data-nav="1">`+
+      `<div class="tn">${esc(w.strong)}</div>`+
+      `<div class="tp ${cls(w.sPct)}">${w.sPct.toFixed(1)}%</div>`+
+    `</div>`+
+    `<div class="tc right" data-nav="1">`+
+      `<div class="tn">${esc(w.weak)}</div>`+
+      `<div class="tp ${cls(w.wPct)}">${w.wPct.toFixed(1)}%</div>`+
+    `</div>`+
+    `<div><div class="vc col-ov15 ${cls(r.over_1_5)}">${fmt(r.over_1_5)}</div><div class="vs">OV1.5</div></div>`+
     `<div><div class="vc col-ov25 ${cls(r.over_2_5)}">${fmt(r.over_2_5)}</div><div class="vs">OV2.5</div></div>`+
     `<div><div class="vc col-ov35 ${cls(r.over_3_5)}">${fmt(r.over_3_5)}</div><div class="vs">OV3.5</div></div>`+
-    `<div><div class="vc ${cls(r.btts)}">${fmt(r.btts)}</div><div class="vs">BTTS</div></div>`+
+    `<div><div class="vc col-btts ${cls(r.btts)}">${fmt(r.btts)}</div><div class="vs">BTTS</div></div>`+
+    `<div><div class="vc ${cls(ts1.pct)}">${fmt(ts1.pct)}</div><div class="vs" title="${esc(ts1.team)}">TS1</div></div>`+
+    `<div><div class="vc ${cls(ts2.pct)}">${fmt(ts2.pct)}</div><div class="vs" title="${esc(ts2.team)}">TS2</div></div>`+
     `<button class="del-btn" title="Delete this match" data-del="1">✕</button>`;
 
-  /* nav click */
   el.querySelectorAll('[data-nav]').forEach(n=>n.addEventListener('click',()=>{
     location.href=`match.html?date=${encodeURIComponent(dateStr)}&key=${encodeURIComponent(key)}`;
   }));
-
-  /* delete click */
-  el.querySelector('[data-del]').addEventListener('click', e=>{
+  el.querySelector('[data-del]').addEventListener('click',e=>{
     e.stopPropagation();
     confirmDelete({
       title:'Delete Match',
       body:`Remove ${esc(r.team_a)} vs ${esc(r.team_b)} from Firebase?`,
-      onConfirm: ()=>deleteEntry(dateStr, key)
+      onConfirm:()=>deleteEntry(dateStr,key)
     });
   });
-
   return el;
 }
 
-/* ── render the visible slice of a group ── */
+/* render group */
 function renderGroup(dateStr){
   const g=dateMap[dateStr];
   if(!g)return;
   const list=g.groupEl.querySelector('.card-list');
-  const footer=g.groupEl.querySelector('.group-footer');
   const countEl=g.groupEl.querySelector('.group-count');
+  const hint=g.groupEl.querySelector('.more-hint');
 
-  /* remove old cards */
   list.innerHTML='';
-
-  const visible=g.pool.slice(0, PREVIEW);
   const frag=document.createDocumentFragment();
-  visible.forEach((entry,i)=>{
-    frag.appendChild(makeCard(entry, i, i*STAGGER));
-  });
+  g.pool.slice(0,PREVIEW).forEach((entry,i)=>frag.appendChild(makeCard(entry,i,i*STAGGER)));
   list.appendChild(frag);
 
-  /* footer hint */
   const total=g.pool.length;
   countEl.textContent=total+' match'+(total===1?'':'es');
-  if(total>PREVIEW){
-    footer.querySelector('.more-hint').textContent=`Showing top ${PREVIEW} of ${total}`;
-  } else {
-    footer.querySelector('.more-hint').textContent='';
-  }
+  hint.textContent=total>PREVIEW?`Showing top ${PREVIEW} of ${total}`:'';
 }
 
-/* ── delete a single entry ── */
-async function deleteEntry(dateStr, key){
+/* delete single */
+async function deleteEntry(dateStr,key){
   const g=dateMap[dateStr];
   if(!g)return;
-
-  /* remove from pool */
   const idx=g.pool.findIndex(e=>e.key===key);
   if(idx===-1)return;
   g.pool.splice(idx,1);
-
-  /* firebase delete */
-  try{ await apiDelete(`/${dateStr}/${key}`); }
-  catch(e){ console.error(e); }
-
-  /* if group now empty remove it */
+  try{ await apiDelete(`/${dateStr}/${key}`); }catch(e){console.error(e);}
   if(g.pool.length===0){
-    g.groupEl.remove();
-    delete dateMap[dateStr];
-    checkGlobalEmpty();
+    g.groupEl.remove(); delete dateMap[dateStr]; checkGlobalEmpty();
   } else {
     renderGroup(dateStr);
   }
   updateTotalCount();
 }
 
-/* ── delete entire date group ── */
+/* delete group */
 async function deleteGroup(dateStr){
   const g=dateMap[dateStr];
   if(!g)return;
-  try{ await apiDelete(`/${dateStr}`); }
-  catch(e){ console.error(e); }
+  try{ await apiDelete(`/${dateStr}`); }catch(e){console.error(e);}
   g.groupEl.remove();
   delete dateMap[dateStr];
   updateTotalCount();
   checkGlobalEmpty();
 }
 
-/* ── delete everything ── */
+/* delete all */
 async function deleteAll(){
-  try{ await apiDelete(''); }
-  catch(e){ console.error(e); }
-  Object.keys(dateMap).forEach(d=>{
-    dateMap[d].groupEl.remove();
-    delete dateMap[d];
-  });
+  try{ await apiDelete(''); }catch(e){console.error(e);}
+  Object.keys(dateMap).forEach(d=>{ dateMap[d].groupEl.remove(); delete dateMap[d]; });
   updateTotalCount();
   checkGlobalEmpty();
 }
 
 function checkGlobalEmpty(){
-  const empty=Object.keys(dateMap).length===0;
-  document.getElementById('global-empty').style.display=empty?'block':'none';
+  document.getElementById('global-empty').style.display=Object.keys(dateMap).length===0?'block':'none';
 }
 
-/* ── build group DOM for a date ── */
-function buildGroupEl(dateStr, pool){
+/* build group DOM */
+function buildGroupEl(dateStr){
   const dObj=new Date(dateStr+'T00:00:00');
   const dateLabel=isNaN(dObj.getTime())?dateStr:dObj.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
 
@@ -398,8 +375,13 @@ function buildGroupEl(dateStr, pool){
     `</div>`+
     `<div class="tbl-head">`+
       `<div></div><div>Strongest</div><div class="th-b">Opponent</div>`+
-      `<div class="th-c">OV1.5</div><div class="th-c th-ov25">OV2.5</div>`+
-      `<div class="th-c th-ov35">OV3.5</div><div class="th-c">BTTS</div><div></div>`+
+      `<div class="th-c th-ov15">OV1.5</div>`+
+      `<div class="th-c th-ov25">OV2.5</div>`+
+      `<div class="th-c th-ov35">OV3.5</div>`+
+      `<div class="th-c th-btts">BTTS</div>`+
+      `<div class="th-c">TS1</div>`+
+      `<div class="th-c">TS2</div>`+
+      `<div></div>`+
     `</div>`+
     `<div class="card-list"></div>`+
     `<div class="group-footer"><span class="more-hint"></span>`+
@@ -413,11 +395,10 @@ function buildGroupEl(dateStr, pool){
       onConfirm:()=>deleteGroup(dateStr)
     });
   });
-
   return wrap;
 }
 
-/* ── modal confirm helper ── */
+/* modal */
 let _pendingConfirm=null;
 function confirmDelete({title,body,onConfirm}){
   document.getElementById('modal-title').textContent=title;
@@ -435,23 +416,21 @@ document.getElementById('overlay').addEventListener('click',e=>{
     _pendingConfirm=null;
   }
 });
-document.getElementById('btn-modal-confirm').addEventListener('click',async ()=>{
+document.getElementById('btn-modal-confirm').addEventListener('click',async()=>{
   const fn=_pendingConfirm;
   _pendingConfirm=null;
   document.getElementById('overlay').classList.remove('open');
   if(fn) await fn();
 });
 
-/* ── clear all ── */
 document.getElementById('btn-clear-all').addEventListener('click',()=>{
   confirmDelete({title:'Clear All Data',body:'Permanently delete every prediction in the database?',onConfirm:deleteAll});
 });
 
-/* ── init ── */
+/* init */
 async function init(){
   try{
     setStatus('Loading predictions…');
-
     const res=await fetch('/api/predictions');
     if(!res.ok)throw new Error('API read '+res.status);
     const data=await res.json();
@@ -461,36 +440,31 @@ async function init(){
 
     if(!data){ setStatus('No predictions found.','idle'); checkGlobalEmpty(); return; }
 
-    /* sort dates newest first */
     const dates=Object.keys(data).sort((a,b)=>b.localeCompare(a));
-
     const groups=document.getElementById('groups');
 
     dates.forEach((dateStr,gi)=>{
       const matches=data[dateStr];
       if(!matches||typeof matches!=='object')return;
 
-      /* build pool sorted by win strength descending */
       const pool=Object.entries(matches)
         .filter(([,r])=>r&&r.team_a)
         .map(([key,r])=>({key,dateStr,r}))
-        .sort((a,b)=>Math.max(b.r.team_a_strength||0,b.r.team_b_strength||0)
-                    -Math.max(a.r.team_a_strength||0,a.r.team_b_strength||0));
+        .sort((a,b)=>
+          Math.max(b.r.team_a_strength||0,b.r.team_b_strength||0)-
+          Math.max(a.r.team_a_strength||0,a.r.team_b_strength||0));
 
-      if(pool.length===0)return;
+      if(!pool.length)return;
 
-      const groupEl=buildGroupEl(dateStr,pool);
-      /* stagger group appearances */
+      const groupEl=buildGroupEl(dateStr);
       groupEl.style.animationDelay=(gi*60)+'ms';
       groups.appendChild(groupEl);
-
       dateMap[dateStr]={pool,groupEl};
       renderGroup(dateStr);
     });
 
     checkGlobalEmpty();
     updateTotalCount();
-
     const total=Object.values(dateMap).reduce((s,g)=>s+g.pool.length,0);
     setStatus(`${total} prediction${total===1?'':'s'} across ${Object.keys(dateMap).length} date${Object.keys(dateMap).length===1?'':'s'}.`,'idle');
 
