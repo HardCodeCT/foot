@@ -112,9 +112,7 @@ main{max-width:820px;margin:0 auto;padding:28px 20px 80px;position:relative;z-in
   letter-spacing:.08em;text-transform:uppercase;
   padding:3px 8px;flex-shrink:0
 }
-.b-footy{background:#0e200e;color:var(--green);border:1px solid #163016}
-.b-flash{background:#0e1420;color:var(--accent);border:1px solid #162030}
-.b-fore {background:#200e0e;color:var(--orange);border:1px solid #301616}
+.b-fore{background:#200e0e;color:var(--orange);border:1px solid #301616}
 .src-name{font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .src-url{font-family:var(--mono);font-size:10px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .src-ext{margin-left:auto;color:var(--muted);font-size:14px;flex-shrink:0}
@@ -291,11 +289,7 @@ function render(r){
   // Source links
   const src=r.sources||{};
   const links=[];
-  if(src.footystats_team_a) links.push({badge:'footy',cls:'b-footy',name:`FootyStats — ${r.team_a}`,url:src.footystats_team_a});
-  if(src.footystats_team_b) links.push({badge:'footy',cls:'b-footy',name:`FootyStats — ${r.team_b}`,url:src.footystats_team_b});
-  if(src.flashscore_team_a) links.push({badge:'flash',cls:'b-flash',name:`Flashscore — ${r.team_a}`,url:src.flashscore_team_a});
-  if(src.flashscore_team_b) links.push({badge:'flash',cls:'b-flash',name:`Flashscore — ${r.team_b}`,url:src.flashscore_team_b});
-  if(src.forebet_h2h)       links.push({badge:'fore', cls:'b-fore', name:'Forebet H2H',              url:src.forebet_h2h});
+  if(src.forebet_h2h) links.push({badge:'fore',cls:'b-fore',name:'Forebet H2H',url:src.forebet_h2h});
 
   const ll=document.getElementById('links-list');
   if(!links.length){
