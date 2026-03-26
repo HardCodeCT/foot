@@ -129,6 +129,14 @@ main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;position:relative;z-i
 
 .vc{font-family:var(--mono);font-size:14px;font-weight:600;text-align:center;line-height:1}
 .vs{font-size:9px;color:var(--text-dim);text-align:center;margin-top:2px}
+/* odds range badge */
+.odds-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;
+  letter-spacing:.04em;padding:1px 4px;border-radius:3px;margin-top:3px;text-align:center;
+  white-space:nowrap;line-height:1.4}
+.odds-low{background:rgba(0,230,118,.12);color:#00e676;border:1px solid rgba(0,230,118,.3)}
+.odds-mid{background:rgba(255,230,0,.10);color:#ffe600;border:1px solid rgba(255,230,0,.3)}
+.odds-high{background:rgba(255,109,0,.12);color:#ff9100;border:1px solid rgba(255,109,0,.3)}
+.odds-xhigh{background:rgba(255,23,68,.10);color:#ff6090;border:1px solid rgba(255,23,68,.25)}
 
 .del-btn{
   width:28px;height:28px;border-radius:2px;
@@ -227,6 +235,17 @@ const dateMap = {};
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function cls(v){ if(v==null||isNaN(v))return'c-dim'; if(v>=70)return'c-hi'; if(v>=50)return'c-mid'; if(v>=35)return'c-lo'; return'c-dim'; }
 function fmt(v){ return(v!=null&&!isNaN(v))?Number(v).toFixed(1)+'%':'—'; }
+/* oddsRange — takes the actual scraped bookmaker odds value (e.g. 1.45) */
+function oddsRange(odds){
+  const v = parseFloat(odds);
+  if(!v || isNaN(v) || v < 1.05) return '';
+  if(v < 1.50) return '<span class="odds-badge odds-low">1.30 – 1.50</span>';
+  if(v < 1.80) return '<span class="odds-badge odds-mid">1.50 – 1.80</span>';
+  if(v < 2.20) return '<span class="odds-badge odds-high">1.80 – 2.20</span>';
+  return '<span class="odds-badge odds-xhigh">2.20+</span>';
+}
+/* homeOdds — picks the home team odds from the record */
+function homeOdds(r){ return r && r.odds && r.odds.home ? r.odds.home : null; }
 function rankCls(i){ return i===0?'rank gold':i===1?'rank silver':i===2?'rank bronze':'rank'; }
 function winStr(r){
   const a=r.team_a_strength||0,b=r.team_b_strength||0;
@@ -277,12 +296,12 @@ function makeCard(entry, rank, delay){
       `<div class="tn">${esc(w.weak)}</div>`+
       `<div class="tp ${cls(w.wPct)}">${w.wPct.toFixed(1)}%</div>`+
     `</div>`+
-    `<div><div class="vc col-ov15 ${cls(r.over_1_5)}">${fmt(r.over_1_5)}</div><div class="vs">OV1.5</div></div>`+
-    `<div><div class="vc col-ov25 ${cls(r.over_2_5)}">${fmt(r.over_2_5)}</div><div class="vs">OV2.5</div></div>`+
-    `<div><div class="vc col-ov35 ${cls(r.over_3_5)}">${fmt(r.over_3_5)}</div><div class="vs">OV3.5</div></div>`+
-    `<div><div class="vc col-btts ${cls(r.btts)}">${fmt(r.btts)}</div><div class="vs">BTTS</div></div>`+
-    `<div><div class="vc ${cls(ts1.pct)}">${fmt(ts1.pct)}</div><div class="vs" title="${esc(ts1.team)}">TS1</div></div>`+
-    `<div><div class="vc ${cls(ts2.pct)}">${fmt(ts2.pct)}</div><div class="vs" title="${esc(ts2.team)}">TS2</div></div>`+
+    `<div style="text-align:center"><div class="vc col-ov15 ${cls(r.over_1_5)}">${fmt(r.over_1_5)}</div><div class="vs">OV1.5</div>${oddsRange(homeOdds(r))}</div>`+
+    `<div style="text-align:center"><div class="vc col-ov25 ${cls(r.over_2_5)}">${fmt(r.over_2_5)}</div><div class="vs">OV2.5</div>${oddsRange(homeOdds(r))}</div>`+
+    `<div style="text-align:center"><div class="vc col-ov35 ${cls(r.over_3_5)}">${fmt(r.over_3_5)}</div><div class="vs">OV3.5</div>${oddsRange(homeOdds(r))}</div>`+
+    `<div style="text-align:center"><div class="vc col-btts ${cls(r.btts)}">${fmt(r.btts)}</div><div class="vs">BTTS</div>${oddsRange(homeOdds(r))}</div>`+
+    `<div style="text-align:center"><div class="vc ${cls(ts1.pct)}">${fmt(ts1.pct)}</div><div class="vs" title="${esc(ts1.team)}">TS1</div>${oddsRange(homeOdds(r))}</div>`+
+    `<div style="text-align:center"><div class="vc ${cls(ts2.pct)}">${fmt(ts2.pct)}</div><div class="vs" title="${esc(ts2.team)}">TS2</div>${oddsRange(homeOdds(r))}</div>`+
     `<button class="del-btn" title="Delete this match" data-del="1">✕</button>`;
 
   el.querySelectorAll('[data-nav]').forEach(n=>n.addEventListener('click',()=>{

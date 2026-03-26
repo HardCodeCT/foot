@@ -14,6 +14,7 @@
   --accent:#00e5ff;--green:#00e676;--yellow:#ffe600;--orange:#ff6d00;--red:#ff1744;
   --muted:#3d4a5c;--text:#c8d4e8;--text-dim:#5a6a80;
   --font:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+  --low:#00e676;--mid:#ffe600;--high:#ff9100;--xhigh:#ff6090;
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
@@ -44,10 +45,13 @@ header{position:sticky;top:0;z-index:100;background:rgba(8,11,15,.95);backdrop-f
 .skel-hd{height:40px;width:260px;margin-bottom:20px;
   background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
   background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
-.skel-tab{height:46px;margin-bottom:4px;
+.skel-tab{height:46px;margin-bottom:6px;
   background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
   background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
-.skel-row{height:52px;margin-bottom:2px;
+.skel-band{height:36px;margin-bottom:4px;
+  background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
+.skel-row{height:80px;margin-bottom:3px;
   background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
   background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -62,8 +66,6 @@ header{position:sticky;top:0;z-index:100;background:rgba(8,11,15,.95);backdrop-f
   transition:background .15s,color .15s;border-radius:2px}
 .btn-red:hover{background:var(--red);color:#fff}
 .btn-red:disabled{opacity:.3;cursor:not-allowed}
-
-/* ── DATE NAV ── */
 .date-nav{display:flex;align-items:center;gap:8px;margin-top:18px}
 .btn-nav{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.06em;
   background:var(--surface2);border:1px solid var(--border2);color:var(--text);
@@ -87,86 +89,80 @@ header{position:sticky;top:0;z-index:100;background:rgba(8,11,15,.95);backdrop-f
 .tab-btn.active .tab-count{color:var(--accent)}
 
 /* ── MAIN ── */
-main{max-width:1100px;margin:0 auto;padding:16px 20px 80px;position:relative;z-index:1}
+main{max-width:1100px;margin:0 auto;padding:20px 20px 80px;position:relative;z-index:1}
 
-/* ── PANELS ── */
-.panel{display:none}
-.panel.active{display:block;animation:panelIn .15s ease both}
-@keyframes panelIn{from{opacity:0}to{opacity:1}}
-
-/* ── TABLE HEADERS ── */
-/* pair tabs: rank | strong | opponent | metric | del */
-.tbl-head-pair{
-  display:grid;grid-template-columns:24px 1fr 1fr 80px 32px;
-  gap:0;padding:0 8px 7px;
-  font-family:var(--mono);font-size:9px;font-weight:600;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-  border-bottom:1px solid var(--border);margin-bottom:3px
+/* ── ODDS BAND SECTION ── */
+.odds-section{margin-bottom:28px}
+.band-header{
+  display:flex;align-items:center;gap:12px;
+  padding:9px 14px;margin-bottom:6px;
+  border-left:3px solid var(--band-color);
+  background:rgba(255,255,255,.02);
 }
-/* single-team tabs: rank | team | win% | metric | del */
-.tbl-head-single{
-  display:grid;grid-template-columns:24px 1fr 80px 80px 32px;
-  gap:0;padding:0 8px 7px;
-  font-family:var(--mono);font-size:9px;font-weight:600;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-  border-bottom:1px solid var(--border);margin-bottom:3px
-}
-.th-c{text-align:center}
+.band-label{font-size:16px;font-weight:800;letter-spacing:.06em;color:var(--band-color)}
+.band-sub{font-family:var(--mono);font-size:10px;color:var(--text-dim)}
+.band-sort-val{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:auto;opacity:.7}
+.band-count{font-family:var(--mono);font-size:10px;font-weight:600;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:var(--text-dim);padding:2px 8px;border-radius:10px;flex-shrink:0}
 
-/* ── CARDS ── */
-.card-list{display:flex;flex-direction:column;gap:2px}
+.band-low  {--band-color:var(--low)}
+.band-mid  {--band-color:var(--mid)}
+.band-high {--band-color:var(--high)}
+.band-xhigh{--band-color:var(--xhigh)}
+.band-none {--band-color:var(--muted)}
 
-.match-card-pair{
-  display:grid;grid-template-columns:24px 1fr 1fr 80px 32px;
-  align-items:center;gap:0;
+/* ── MATCH CARD ── */
+.match-card{
   background:var(--surface);border:1px solid var(--border);
-  padding:9px 8px;
+  margin-bottom:3px;padding:11px 14px 9px;
   transition:border-color .15s,background .15s;
-  opacity:0;animation:rise .28s cubic-bezier(.22,1,.36,1) both;overflow:hidden
+  opacity:0;animation:rise .28s cubic-bezier(.22,1,.36,1) both;overflow:hidden;cursor:pointer;
 }
-.match-card-pair:hover{background:var(--surface2);border-color:var(--border2)}
-
-.match-card-single{
-  display:grid;grid-template-columns:24px 1fr 80px 80px 32px;
-  align-items:center;gap:0;
-  background:var(--surface);border:1px solid var(--border);
-  padding:9px 8px;
-  transition:border-color .15s,background .15s;
-  opacity:0;animation:rise .28s cubic-bezier(.22,1,.36,1) both;overflow:hidden
-}
-.match-card-single:hover{background:var(--surface2);border-color:var(--border2)}
-
-.match-card-pair.removing,.match-card-single.removing{
+.match-card:hover{background:var(--surface2);border-color:var(--border2)}
+.match-card.removing{
   animation:none !important;
   transition:max-height .28s ease,opacity .22s ease,padding .28s ease,margin .28s ease !important;
   max-height:0 !important;opacity:0 !important;
   padding-top:0 !important;padding-bottom:0 !important;
   border-top-width:0 !important;border-bottom-width:0 !important;margin:0 !important
 }
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
-.rank{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);text-align:center}
-.rank.gold{color:#ffd700}.rank.silver{color:#c0c0c0}.rank.bronze{color:#cd7f32}
-
-.tc{display:flex;flex-direction:column;gap:2px;overflow:hidden;padding:0 7px;cursor:pointer}
-.tc.right{text-align:right;align-items:flex-end}
-.tn{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
-.tp{font-family:var(--mono);font-size:10px}
-
-/* big metric */
-.vc{font-family:var(--mono);font-size:20px;font-weight:600;text-align:center;line-height:1}
-.vs{font-size:9px;color:var(--text-dim);text-align:center;margin-top:2px}
-
-/* secondary metric (single tabs) */
-.vc-sm{font-family:var(--mono);font-size:15px;font-weight:600;text-align:center;line-height:1}
-
+/* card top row */
+.card-top{display:flex;align-items:center;gap:10px}
+.card-rank{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);min-width:20px;text-align:center;flex-shrink:0}
+.card-rank.gold{color:#ffd700}.card-rank.silver{color:#c0c0c0}.card-rank.bronze{color:#cd7f32}
+.card-teams{flex:1;min-width:0}
+.card-matchup{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.team-name{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.vs-sep{font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0}
+.card-meta{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:2px}
+.card-odds-pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:3px;
+  flex-shrink:0;white-space:nowrap;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text-dim)}
+.card-odds-pill.has-odds{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)}
 .del-btn{width:28px;height:28px;border-radius:2px;background:none;border:1px solid transparent;
   color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:color .15s,border-color .15s,background .15s;flex-shrink:0}
 .del-btn:hover{color:var(--red);border-color:rgba(255,23,68,.5);background:rgba(255,23,68,.07)}
 
+/* stats row */
+.card-stats{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.stat-chip{display:flex;flex-direction:column;align-items:center;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:3px;padding:5px 7px;min-width:50px;flex:1}
+.stat-val{font-family:var(--mono);font-size:13px;font-weight:600;line-height:1}
+.stat-lbl{font-size:8px;color:var(--text-dim);margin-top:2px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+/* highlight the active metric chip */
+.stat-chip.active-metric{border-color:var(--accent);background:rgba(0,229,255,.07)}
+.stat-chip.active-metric .stat-val{color:var(--accent)}
+.stat-chip.active-metric .stat-lbl{color:rgba(0,229,255,.6)}
+/* strength chip */
+.stat-chip.str-chip{border-color:rgba(0,229,255,.12);background:rgba(0,229,255,.04)}
+.stat-chip.str-chip .stat-val{color:var(--accent)}
+
 .c-hi{color:var(--green)}.c-mid{color:var(--yellow)}.c-lo{color:var(--orange)}.c-dim{color:var(--text-dim)}
-.empty{text-align:center;padding:50px 20px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.empty-all{text-align:center;padding:60px 20px;font-family:var(--mono);font-size:12px;color:var(--muted);display:none}
 
 /* ── MODAL ── */
 .overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);
@@ -184,12 +180,10 @@ main{max-width:1100px;margin:0 auto;padding:16px 20px 80px;position:relative;z-i
   transition:color .15s,border-color .15s}
 .btn-cancel:hover{color:var(--text);border-color:var(--text)}
 
-/* ── RESPONSIVE ── */
 @media(max-width:580px){
-  .match-card-pair{grid-template-columns:24px 1fr 80px 32px}
-  .tc.right,.tbl-head-pair .th-b{display:none}
-  .match-card-single{grid-template-columns:24px 1fr 80px 32px}
-  .vc-sm,.tbl-head-single .th-win{display:none}
+  .team-name{max-width:100px}
+  .stat-chip{min-width:40px;padding:4px 4px}
+  .stat-val{font-size:11px}
 }
 </style>
 </head>
@@ -205,8 +199,10 @@ main{max-width:1100px;margin:0 auto;padding:16px 20px 80px;position:relative;z-i
 <div class="skeleton-wrap" id="skeletons">
   <div class="skel-hd"></div>
   <div class="skel-tab"></div>
-  <div class="skel-row"></div><div class="skel-row"></div><div class="skel-row"></div>
+  <div class="skel-band"></div>
   <div class="skel-row"></div><div class="skel-row"></div>
+  <div class="skel-band"></div>
+  <div class="skel-row"></div><div class="skel-row"></div><div class="skel-row"></div>
 </div>
 
 <div id="page-header">
@@ -233,49 +229,10 @@ main{max-width:1100px;margin:0 auto;padding:16px 20px 80px;position:relative;z-i
 </div>
 
 <main id="main" style="display:none">
-
-  <!-- PAIR TABS -->
-  <div class="panel active" id="panel-win">
-    <div class="tbl-head-pair"><div></div><div>Stronger Team</div><div class="th-b">Opponent</div><div class="th-c">Win %</div><div></div></div>
-    <div class="card-list" id="list-win"></div>
-    <div class="empty" id="empty-win" style="display:none">No matches.</div>
-  </div>
-  <div class="panel" id="panel-ov15">
-    <div class="tbl-head-pair"><div></div><div>Team A</div><div class="th-b">Team B</div><div class="th-c">OV 1.5</div><div></div></div>
-    <div class="card-list" id="list-ov15"></div>
-    <div class="empty" id="empty-ov15" style="display:none">No matches.</div>
-  </div>
-  <div class="panel" id="panel-ov25">
-    <div class="tbl-head-pair"><div></div><div>Team A</div><div class="th-b">Team B</div><div class="th-c">OV 2.5</div><div></div></div>
-    <div class="card-list" id="list-ov25"></div>
-    <div class="empty" id="empty-ov25" style="display:none">No matches.</div>
-  </div>
-  <div class="panel" id="panel-ov35">
-    <div class="tbl-head-pair"><div></div><div>Team A</div><div class="th-b">Team B</div><div class="th-c">OV 3.5</div><div></div></div>
-    <div class="card-list" id="list-ov35"></div>
-    <div class="empty" id="empty-ov35" style="display:none">No matches.</div>
-  </div>
-  <div class="panel" id="panel-btts">
-    <div class="tbl-head-pair"><div></div><div>Team A</div><div class="th-b">Team B</div><div class="th-c">BTTS</div><div></div></div>
-    <div class="card-list" id="list-btts"></div>
-    <div class="empty" id="empty-btts" style="display:none">No matches.</div>
-  </div>
-
-  <!-- SINGLE-TEAM TABS -->
-  <div class="panel" id="panel-ts1">
-    <div class="tbl-head-single"><div></div><div>Team Most Likely to Score</div><div class="th-c th-win">Win %</div><div class="th-c">Score ≥1</div><div></div></div>
-    <div class="card-list" id="list-ts1"></div>
-    <div class="empty" id="empty-ts1" style="display:none">No matches.</div>
-  </div>
-  <div class="panel" id="panel-ts2">
-    <div class="tbl-head-single"><div></div><div>Team Most Likely to Score 2+</div><div class="th-c th-win">Win %</div><div class="th-c">Score 2+</div><div></div></div>
-    <div class="card-list" id="list-ts2"></div>
-    <div class="empty" id="empty-ts2" style="display:none">No matches.</div>
-  </div>
-
+  <div id="bands-wrap"></div>
+  <div class="empty-all" id="empty-all">No predictions for this date.</div>
 </main>
 
-<!-- modal -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2 id="modal-title">Confirm Delete</h2>
@@ -290,196 +247,215 @@ main{max-width:1100px;margin:0 auto;padding:16px 20px 80px;position:relative;z-i
 <script>
 "use strict";
 
-const STAGGER     = 30;
-const PAIR_TABS   = ['win','ov15','ov25','ov35','btts'];
-const SINGLE_TABS = ['ts1','ts2'];
-const ALL_TABS    = [...PAIR_TABS, ...SINGLE_TABS];
+const STAGGER = 22;
 
+/* ── Tab definitions ── */
+const TABS = {
+  win:  { label:'Win %',    metric: r => Math.max(r.team_a_strength||0, r.team_b_strength||0), chipKey:'win'   },
+  ov15: { label:'OV 1.5',   metric: r => r.over_1_5||0,                                        chipKey:'ov15'  },
+  ov25: { label:'OV 2.5',   metric: r => r.over_2_5||0,                                        chipKey:'ov25'  },
+  ov35: { label:'OV 3.5',   metric: r => r.over_3_5||0,                                        chipKey:'ov35'  },
+  btts: { label:'BTTS',     metric: r => r.btts||0,                                             chipKey:'btts'  },
+  ts1:  { label:'Score ≥1', metric: r => Math.max(r.team_a_to_score||0,  r.team_b_to_score||0),  chipKey:'ts1' },
+  ts2:  { label:'Score 2+', metric: r => Math.max(r.team_a_to_score_2||0,r.team_b_to_score_2||0),chipKey:'ts2' },
+};
+
+const BAND_ORDER = ['low','mid','high','xhigh','none'];
+const BAND_META  = {
+  low:   { label:'1.30 – 1.50', cls:'band-low',   desc:'Strong Favourites'   },
+  mid:   { label:'1.50 – 1.80', cls:'band-mid',   desc:'Moderate Favourites' },
+  high:  { label:'1.80 – 2.20', cls:'band-high',  desc:'Slight Favourites'   },
+  xhigh: { label:'2.20+',       cls:'band-xhigh', desc:'Open Fixtures'       },
+  none:  { label:'No Odds',     cls:'band-none',  desc:'Odds unavailable'    },
+};
+
+let activeTab = 'win';
 let dateStr   = null;
-let allDates  = [];   // sorted list of all date keys from Firebase
+let allDates  = [];
 const pool    = {};   // { [pushKey]: record }
 
-/* ── Sort metrics for each pair tab — higher = better ── */
-const PAIR_METRIC = {
-  win:  r => Math.max(r.team_a_strength||0, r.team_b_strength||0),
-  ov15: r => r.over_1_5||0,
-  ov25: r => r.over_2_5||0,
-  ov35: r => r.over_3_5||0,
-  btts: r => r.btts||0,
-};
-const PAIR_LABEL = {win:'Win %',ov15:'OV 1.5',ov25:'OV 2.5',ov35:'OV 3.5',btts:'BTTS'};
-
-/* ── helpers ── */
-const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* ── Helpers ── */
+const esc    = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function cls(v){ if(v==null||isNaN(v))return'c-dim'; if(v>=70)return'c-hi'; if(v>=50)return'c-mid'; if(v>=35)return'c-lo'; return'c-dim'; }
 function fmt(v){ return(v!=null&&!isNaN(v))?Number(v).toFixed(1)+'%':'—'; }
-function rankCls(i){ return i===0?'rank gold':i===1?'rank silver':i===2?'rank bronze':'rank'; }
+function fmtOdds(v){ const n=parseFloat(v); return(!n||isNaN(n))?'—':n.toFixed(2); }
 
-function winTeams(r){
-  const a=r.team_a_strength||0,b=r.team_b_strength||0;
-  return a>=b
-    ?{strong:r.team_a,sPct:a,weak:r.team_b,wPct:b}
-    :{strong:r.team_b,sPct:b,weak:r.team_a,wPct:a};
-}
-function bestTS(r,fa,fb){
-  const va=r[fa]||0,vb=r[fb]||0;
-  return va>=vb
-    ?{team:r.team_a,winPct:r.team_a_strength||0,pct:va}
-    :{team:r.team_b,winPct:r.team_b_strength||0,pct:vb};
+function oddsBand(r){
+  const v = parseFloat(r && r.odds && r.odds.home);
+  if(!v || isNaN(v) || v < 1.05) return 'none';
+  if(v < 1.50) return 'low';
+  if(v < 1.80) return 'mid';
+  if(v < 2.20) return 'high';
+  return 'xhigh';
 }
 
-function setStatus(msg,state){
-  document.getElementById('status-txt').textContent=msg;
-  document.getElementById('dot').className='dot'+(state?' '+state:'');
+function rankCls(i){
+  return i===0?'card-rank gold':i===1?'card-rank silver':i===2?'card-rank bronze':'card-rank';
 }
 
-/* ── API ── */
-async function apiDelete(path){
-  const res=await fetch(`/api/predictions${path}`,{method:'DELETE'});
-  if(!res.ok)throw new Error('Delete '+res.status);
-}
+/* ── Build one full-stats card, highlighting the active metric chip ── */
+function makeCard(key, r, rank, delay, tab){
+  const sa  = r.team_a_strength||0, sb = r.team_b_strength||0;
+  const ho  = fmtOdds(r.odds && r.odds.home);
+  const do_ = fmtOdds(r.odds && r.odds.draw);
+  const ao  = fmtOdds(r.odds && r.odds.away);
+  const ts1 = Math.max(r.team_a_to_score||0,  r.team_b_to_score||0);
+  const ts2 = Math.max(r.team_a_to_score_2||0, r.team_b_to_score_2||0);
+  const ck  = TABS[tab].chipKey;
 
-/* ── Build pair card ── */
-function makePairCard(key,r,tab,rank,delay){
-  const w         = winTeams(r);
-  const metricVal = PAIR_METRIC[tab](r);
-  const label     = PAIR_LABEL[tab];
+  /* which team is more likely to score for TS */
+  const ts1Team = (r.team_a_to_score||0) >= (r.team_b_to_score||0)  ? r.team_a : r.team_b;
+  const ts2Team = (r.team_a_to_score_2||0) >= (r.team_b_to_score_2||0) ? r.team_a : r.team_b;
 
-  const el=document.createElement('div');
-  el.className='match-card-pair';
-  el.style.animationDelay=delay+'ms';
-  el.dataset.key=key;
-  el.innerHTML=
-    `<div class="${rankCls(rank)}">${rank+1}</div>`+
-    `<div class="tc" data-nav="1"><div class="tn">${esc(w.strong)}</div><div class="tp ${cls(w.sPct)}">${w.sPct.toFixed(1)}%</div></div>`+
-    `<div class="tc right" data-nav="1"><div class="tn">${esc(w.weak)}</div><div class="tp ${cls(w.wPct)}">${w.wPct.toFixed(1)}%</div></div>`+
-    `<div><div class="vc ${cls(metricVal)}">${fmt(metricVal)}</div><div class="vs">${label}</div></div>`+
-    `<button class="del-btn" data-del="1" title="Delete">✕</button>`;
-
-  el.querySelectorAll('[data-nav]').forEach(n=>n.addEventListener('click',()=>{
-    location.href=`match.html?date=${encodeURIComponent(dateStr)}&key=${encodeURIComponent(key)}`;
-  }));
-  el.querySelector('[data-del]').addEventListener('click',e=>{
-    e.stopPropagation();
-    confirmDelete({
-      title:'Delete Match',
-      body:`Remove ${esc(r.team_a)} vs ${esc(r.team_b)}?`,
-      onConfirm:()=>deleteEntry(key)
-    });
-  });
-  return el;
-}
-
-/* ── Build single-team card (TS1 / TS2) ── */
-function makeSingleCard(key,r,tab,rank,delay){
-  const d        = tab==='ts1'
-    ? bestTS(r,'team_a_to_score','team_b_to_score')
-    : bestTS(r,'team_a_to_score_2','team_b_to_score_2');
-  const label    = tab==='ts1' ? 'Score ≥1' : 'Score 2+';
-  const opponent = r.team_a===d.team ? r.team_b : r.team_a;
-
-  const el=document.createElement('div');
-  el.className='match-card-single';
-  el.style.animationDelay=delay+'ms';
-  el.dataset.key=key;
-  el.innerHTML=
-    `<div class="${rankCls(rank)}">${rank+1}</div>`+
-    `<div class="tc" data-nav="1">`+
-      `<div class="tn">${esc(d.team)}</div>`+
-      `<div class="tp c-dim">vs ${esc(opponent)}</div>`+
-    `</div>`+
-    `<div><div class="vc-sm ${cls(d.winPct)}">${fmt(d.winPct)}</div><div class="vs">Win %</div></div>`+
-    `<div><div class="vc ${cls(d.pct)}">${fmt(d.pct)}</div><div class="vs">${label}</div></div>`+
-    `<button class="del-btn" data-del="1" title="Delete">✕</button>`;
-
-  el.querySelectorAll('[data-nav]').forEach(n=>n.addEventListener('click',()=>{
-    location.href=`match.html?date=${encodeURIComponent(dateStr)}&key=${encodeURIComponent(key)}`;
-  }));
-  el.querySelector('[data-del]').addEventListener('click',e=>{
-    e.stopPropagation();
-    confirmDelete({
-      title:'Delete Match',
-      body:`Remove ${esc(r.team_a)} vs ${esc(r.team_b)}?`,
-      onConfirm:()=>deleteEntry(key)
-    });
-  });
-  return el;
-}
-
-/* ── Render one tab (always re-sorted best-first) ── */
-function renderTab(tab){
-  const isPair = PAIR_TABS.includes(tab);
-  let entries;
-
-  if(isPair){
-    /* Sort descending by this tab's metric — highest value = rank 1 */
-    entries = Object.entries(pool).sort((a,b)=>PAIR_METRIC[tab](b[1])-PAIR_METRIC[tab](a[1]));
-  } else if(tab==='ts1'){
-    entries = Object.entries(pool).sort((a,b)=>
-      Math.max(b[1].team_a_to_score||0,b[1].team_b_to_score||0)-
-      Math.max(a[1].team_a_to_score||0,a[1].team_b_to_score||0));
-  } else { /* ts2 */
-    entries = Object.entries(pool).sort((a,b)=>
-      Math.max(b[1].team_a_to_score_2||0,b[1].team_b_to_score_2||0)-
-      Math.max(a[1].team_a_to_score_2||0,a[1].team_b_to_score_2||0));
+  function chip(chipId, val, label, extra){
+    const isActive = chipId === ck;
+    const cls2 = isActive ? 'stat-chip active-metric' : (extra||'stat-chip');
+    const valCls = isActive ? '' : cls(val);
+    const sublabel = chipId==='ts1' ? `<div style="font-size:7px;color:rgba(0,229,255,.5);margin-top:1px">${esc(ts1Team)}</div>` :
+                     chipId==='ts2' ? `<div style="font-size:7px;color:rgba(0,229,255,.5);margin-top:1px">${esc(ts2Team)}</div>` : '';
+    return `<div class="${cls2}"><div class="stat-val ${valCls}">${fmt(val)}</div><div class="stat-lbl">${label}</div>${sublabel}</div>`;
   }
 
-  const list  = document.getElementById('list-'+tab);
-  const empty = document.getElementById('empty-'+tab);
-  const frag  = document.createDocumentFragment();
+  const el = document.createElement('div');
+  el.className = 'match-card';
+  el.style.animationDelay = delay + 'ms';
+  el.dataset.key = key;
 
-  entries.forEach(([key,r],i)=>{
-    frag.appendChild(isPair
-      ? makePairCard(key,r,tab,i,i*STAGGER)
-      : makeSingleCard(key,r,tab,i,i*STAGGER));
+  el.innerHTML =
+    `<div class="card-top">`+
+      `<div class="${rankCls(rank)}">${rank+1}</div>`+
+      `<div class="card-teams">`+
+        `<div class="card-matchup">`+
+          `<span class="team-name" title="${esc(r.team_a)}">${esc(r.team_a)}</span>`+
+          `<span class="vs-sep">vs</span>`+
+          `<span class="team-name" title="${esc(r.team_b)}">${esc(r.team_b)}</span>`+
+        `</div>`+
+        `<div class="card-meta">`+
+          (r.league?esc(r.league):'')+
+          (r.time?`  ·  ${esc(r.time)}`:'')+
+        `</div>`+
+      `</div>`+
+      `<div class="card-odds-pill${ho!=='—'?' has-odds':''}" title="Home | Draw | Away">`+
+        `${ho} <span style="opacity:.4">|</span> ${do_} <span style="opacity:.4">|</span> ${ao}`+
+      `</div>`+
+      `<button class="del-btn" data-del="1" title="Delete">✕</button>`+
+    `</div>`+
+    `<div class="card-stats">`+
+      `<div class="stat-chip str-chip"><div class="stat-val">${sa.toFixed(1)}%</div><div class="stat-lbl">${esc(r.team_a||'A')}</div></div>`+
+      `<div class="stat-chip str-chip"><div class="stat-val">${sb.toFixed(1)}%</div><div class="stat-lbl">${esc(r.team_b||'B')}</div></div>`+
+      chip('ov15', r.over_1_5,  'OV 1.5')+
+      chip('ov25', r.over_2_5,  'OV 2.5')+
+      chip('ov35', r.over_3_5,  'OV 3.5')+
+      chip('btts', r.btts,      'BTTS')+
+      chip('ts1',  ts1,         'Score ≥1')+
+      chip('ts2',  ts2,         'Score 2+')+
+    `</div>`;
+
+  el.addEventListener('click', e => {
+    if(e.target.closest('[data-del]')) return;
+    location.href = `match.html?date=${encodeURIComponent(dateStr)}&key=${encodeURIComponent(key)}`;
+  });
+  el.querySelector('[data-del]').addEventListener('click', e => {
+    e.stopPropagation();
+    confirmDelete({
+      title: 'Delete Match',
+      body: `Remove ${esc(r.team_a)} vs ${esc(r.team_b)}?`,
+      onConfirm: () => deleteEntry(key)
+    });
+  });
+  return el;
+}
+
+/* ── Render all bands for the active tab ── */
+function renderBands(){
+  const tab    = activeTab;
+  const metric = TABS[tab].metric;
+  const wrap   = document.getElementById('bands-wrap');
+  wrap.innerHTML = '';
+
+  /* bucket entries by odds band */
+  const buckets = {low:[],mid:[],high:[],xhigh:[],none:[]};
+  Object.entries(pool).forEach(([key,r]) => buckets[oddsBand(r)].push([key,r]));
+
+  /* sort each bucket by the active metric descending */
+  const byMetric = (a,b) => metric(b[1]) - metric(a[1]);
+
+  let totalCards  = 0;
+  let globalDelay = 0;
+
+  BAND_ORDER.forEach(band => {
+    const entries = buckets[band].sort(byMetric);
+    if(!entries.length) return;
+    totalCards += entries.length;
+
+    const meta    = BAND_META[band];
+    const topVal  = fmt(metric(entries[0][1]));  // best metric value in this band
+
+    const section = document.createElement('div');
+    section.className = 'odds-section';
+    section.innerHTML =
+      `<div class="band-header ${meta.cls}">`+
+        `<div class="band-label">${meta.label}</div>`+
+        `<div class="band-sub">${meta.desc}</div>`+
+        `<div class="band-sort-val">Top ${TABS[tab].label}: ${topVal}</div>`+
+        `<div class="band-count">${entries.length}</div>`+
+      `</div>`;
+
+    const list = document.createElement('div');
+    entries.forEach(([key,r], i) => {
+      list.appendChild(makeCard(key, r, i, globalDelay, tab));
+      globalDelay += STAGGER;
+    });
+    section.appendChild(list);
+    wrap.appendChild(section);
   });
 
-  list.innerHTML='';
-  list.appendChild(frag);
-  empty.style.display = entries.length===0 ? 'block' : 'none';
-  document.getElementById('cnt-'+tab).textContent = entries.length;
+  /* update tab counts (all tabs share the same pool) */
+  Object.keys(TABS).forEach(t => {
+    document.getElementById('cnt-'+t).textContent = Object.keys(pool).length;
+  });
+
+  document.getElementById('empty-all').style.display = totalCards===0 ? 'block' : 'none';
+  const n = Object.keys(pool).length;
+  document.getElementById('pg-sub').textContent = n + ' prediction' + (n===1?'':'s');
 }
 
-function renderAll(){
-  ALL_TABS.forEach(renderTab);
-  const n=Object.keys(pool).length;
-  document.getElementById('pg-sub').textContent=n+' prediction'+(n===1?'':'s');
-}
+/* ── Tab switching ── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeTab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === activeTab));
+    renderBands();
+    window.scrollTo({top: document.getElementById('main').offsetTop - 70, behavior:'smooth'});
+  });
+});
 
 /* ── Delete single entry ── */
 async function deleteEntry(key){
-  // animate out
   document.querySelectorAll(`[data-key="${CSS.escape(key)}"]`).forEach(el=>el.classList.add('removing'));
   await new Promise(r=>setTimeout(r,300));
-
   delete pool[key];
   try{ await apiDelete(`/${dateStr}/${key}`); }catch(e){console.error(e);}
-
   if(Object.keys(pool).length===0){
     await apiDelete(`/${dateStr}`).catch(()=>{});
     location.href='index.html';
     return;
   }
-  renderAll();
+  renderBands();
 }
 
-/* ── Delete entire date ── */
 async function deleteDateNode(){
   try{ await apiDelete(`/${dateStr}`); }catch(e){console.error(e);}
   location.href='index.html';
 }
 
-/* ── Tab switching ── */
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const t=btn.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
-    ALL_TABS.forEach(id=>document.getElementById('panel-'+id).classList.toggle('active',id===t));
-  });
-});
+async function apiDelete(path){
+  const res=await fetch(`/api/predictions${path}`,{method:'DELETE'});
+  if(!res.ok) throw new Error('Delete '+res.status);
+}
 
 /* ── Modal ── */
-let _pending=null;
+let _pending = null;
 function confirmDelete({title,body,onConfirm}){
   document.getElementById('modal-title').textContent=title;
   document.getElementById('modal-body').textContent=body;
@@ -487,13 +463,11 @@ function confirmDelete({title,body,onConfirm}){
   document.getElementById('overlay').classList.add('open');
 }
 document.getElementById('btn-modal-cancel').addEventListener('click',()=>{
-  document.getElementById('overlay').classList.remove('open');
-  _pending=null;
+  document.getElementById('overlay').classList.remove('open'); _pending=null;
 });
 document.getElementById('overlay').addEventListener('click',e=>{
   if(e.target===document.getElementById('overlay')){
-    document.getElementById('overlay').classList.remove('open');
-    _pending=null;
+    document.getElementById('overlay').classList.remove('open'); _pending=null;
   }
 });
 document.getElementById('btn-modal-confirm').addEventListener('click',async()=>{
@@ -509,48 +483,36 @@ document.getElementById('btn-del-date').addEventListener('click',()=>{
   });
 });
 
-/* ── Init ── */
-/* ── Date navigation helpers ── */
-function goToDate(d){
-  location.href=`date.html?date=${encodeURIComponent(d)}`;
+function setStatus(msg,state){
+  document.getElementById('status-txt').textContent=msg;
+  document.getElementById('dot').className='dot'+(state?' '+state:'');
 }
 
+/* ── Date nav ── */
+function goToDate(d){ location.href=`date.html?date=${encodeURIComponent(d)}`; }
 function updateDateNav(){
-  const idx=allDates.indexOf(dateStr);
-  const total=allDates.length;
+  const idx=allDates.indexOf(dateStr), total=allDates.length;
   const btnPrev=document.getElementById('btn-prev-date');
   const btnNext=document.getElementById('btn-next-date');
   const counter=document.getElementById('date-nav-counter');
-
-  if(total<=1){
-    btnPrev.disabled=true;
-    btnNext.disabled=true;
-    counter.textContent='';
-    return;
-  }
-
-  // allDates sorted ascending (oldest first); prev = earlier date, next = later date
-  btnPrev.disabled = idx<=0;
-  btnNext.disabled = idx>=total-1;
+  if(total<=1){btnPrev.disabled=true;btnNext.disabled=true;counter.textContent='';return;}
+  btnPrev.disabled=idx<=0; btnNext.disabled=idx>=total-1;
   counter.textContent=`${idx+1} of ${total}`;
-
-  btnPrev.onclick = idx>0        ? ()=>goToDate(allDates[idx-1]) : null;
-  btnNext.onclick = idx<total-1  ? ()=>goToDate(allDates[idx+1]) : null;
+  btnPrev.onclick=idx>0?()=>goToDate(allDates[idx-1]):null;
+  btnNext.onclick=idx<total-1?()=>goToDate(allDates[idx+1]):null;
 }
-
 async function loadAllDates(){
   try{
     const res=await fetch('/api/predictions');
-    if(!res.ok) return;
+    if(!res.ok)return;
     const data=await res.json();
-    if(data && typeof data==='object'){
-      // Sort ascending so index 0 = oldest, last = newest
+    if(data&&typeof data==='object')
       allDates=Object.keys(data).filter(d=>d&&d.match(/\d{4}-\d{2}-\d{2}/)).sort();
-    }
-  }catch(e){ /* silently ignore — nav just stays disabled */ }
+  }catch(e){}
   updateDateNav();
 }
 
+/* ── Init ── */
 async function init(){
   const params=new URLSearchParams(location.search);
   dateStr=params.get('date');
@@ -559,13 +521,8 @@ async function init(){
     setStatus('No date specified.','err');
     return;
   }
-
-  // Kick off date list fetch in parallel (non-blocking)
   loadAllDates();
-
   try{
-    /* This was the 500: the api/predictions/[date].js had wrong import path.
-       Fixed by changing "../../_firebase.js" → "../_firebase.js" in that file. */
     const res=await fetch(`/api/predictions/${dateStr}`);
     if(!res.ok) throw new Error('API '+res.status);
     const data=await res.json();
@@ -580,19 +537,17 @@ async function init(){
     document.title=`FP Scout — ${dateLabel}`;
     document.getElementById('pg-date').textContent=dateLabel;
 
-    if(data && typeof data==='object'){
+    if(data&&typeof data==='object')
       Object.entries(data).forEach(([key,r])=>{ if(r&&r.team_a) pool[key]=r; });
-    }
 
     document.getElementById('page-header').style.display='block';
     document.getElementById('tabs-wrap').style.display='flex';
     document.getElementById('main').style.display='';
 
-    renderAll();
+    renderBands();
 
     const n=Object.keys(pool).length;
     setStatus(`${n} prediction${n===1?'':'s'} for ${dateLabel}.`,'idle');
-
   }catch(err){
     document.getElementById('skeletons').style.display='none';
     setStatus('Error: '+err.message,'err');
