@@ -63,6 +63,16 @@ header{position:sticky;top:0;z-index:100;background:rgba(8,11,15,.95);backdrop-f
 .btn-red:hover{background:var(--red);color:#fff}
 .btn-red:disabled{opacity:.3;cursor:not-allowed}
 
+/* ── DATE NAV ── */
+.date-nav{display:flex;align-items:center;gap:8px;margin-top:18px}
+.btn-nav{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.06em;
+  background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+  padding:7px 18px;cursor:pointer;border-radius:2px;transition:all .15s;display:flex;align-items:center;gap:6px}
+.btn-nav:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:#000}
+.btn-nav:disabled{opacity:.25;cursor:not-allowed}
+.btn-nav .arrow{font-size:16px;line-height:1}
+.date-nav-counter{font-family:var(--mono);font-size:11px;color:var(--muted);padding:0 6px}
+
 /* ── TABS ── */
 .tabs-wrap{position:sticky;top:58px;z-index:90;background:rgba(8,11,15,.97);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto;display:none}
@@ -205,6 +215,11 @@ main{max-width:1100px;margin:0 auto;padding:16px 20px 80px;position:relative;z-i
   <div class="pg-actions">
     <button class="btn-red" id="btn-del-date">✕ Delete This Entire Date</button>
   </div>
+  <div class="date-nav">
+    <button class="btn-nav" id="btn-prev-date" disabled><span class="arrow">‹</span> Prev Date</button>
+    <span class="date-nav-counter" id="date-nav-counter"></span>
+    <button class="btn-nav" id="btn-next-date" disabled>Next Date <span class="arrow">›</span></button>
+  </div>
 </div>
 
 <div class="tabs-wrap" id="tabs-wrap">
@@ -280,8 +295,9 @@ const PAIR_TABS   = ['win','ov15','ov25','ov35','btts'];
 const SINGLE_TABS = ['ts1','ts2'];
 const ALL_TABS    = [...PAIR_TABS, ...SINGLE_TABS];
 
-let dateStr = null;
-const pool  = {};   // { [pushKey]: record }
+let dateStr   = null;
+let allDates  = [];   // sorted list of all date keys from Firebase
+const pool    = {};   // { [pushKey]: record }
 
 /* ── Sort metrics for each pair tab — higher = better ── */
 const PAIR_METRIC = {
@@ -494,6 +510,47 @@ document.getElementById('btn-del-date').addEventListener('click',()=>{
 });
 
 /* ── Init ── */
+/* ── Date navigation helpers ── */
+function goToDate(d){
+  location.href=`date.html?date=${encodeURIComponent(d)}`;
+}
+
+function updateDateNav(){
+  const idx=allDates.indexOf(dateStr);
+  const total=allDates.length;
+  const btnPrev=document.getElementById('btn-prev-date');
+  const btnNext=document.getElementById('btn-next-date');
+  const counter=document.getElementById('date-nav-counter');
+
+  if(total<=1){
+    btnPrev.disabled=true;
+    btnNext.disabled=true;
+    counter.textContent='';
+    return;
+  }
+
+  // allDates sorted ascending (oldest first); prev = earlier date, next = later date
+  btnPrev.disabled = idx<=0;
+  btnNext.disabled = idx>=total-1;
+  counter.textContent=`${idx+1} of ${total}`;
+
+  btnPrev.onclick = idx>0        ? ()=>goToDate(allDates[idx-1]) : null;
+  btnNext.onclick = idx<total-1  ? ()=>goToDate(allDates[idx+1]) : null;
+}
+
+async function loadAllDates(){
+  try{
+    const res=await fetch('/api/predictions');
+    if(!res.ok) return;
+    const data=await res.json();
+    if(data && typeof data==='object'){
+      // Sort ascending so index 0 = oldest, last = newest
+      allDates=Object.keys(data).filter(d=>d&&d.match(/\d{4}-\d{2}-\d{2}/)).sort();
+    }
+  }catch(e){ /* silently ignore — nav just stays disabled */ }
+  updateDateNav();
+}
+
 async function init(){
   const params=new URLSearchParams(location.search);
   dateStr=params.get('date');
@@ -502,6 +559,9 @@ async function init(){
     setStatus('No date specified.','err');
     return;
   }
+
+  // Kick off date list fetch in parallel (non-blocking)
+  loadAllDates();
 
   try{
     /* This was the 500: the api/predictions/[date].js had wrong import path.
