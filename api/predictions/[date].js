@@ -1,4 +1,4 @@
-import { db } from "../../_firebase.js";
+import { db } from "../_firebase.js";
 
 export default async function handler(req, res) {
   const { date } = req.query;
